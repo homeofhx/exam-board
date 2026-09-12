@@ -247,7 +247,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1;
+				MARKETING_VERSION = BETA;
 				PRODUCT_BUNDLE_IDENTIFIER = hx.ExamBoard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -276,7 +276,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 1;
+				MARKETING_VERSION = BETA;
 				PRODUCT_BUNDLE_IDENTIFIER = hx.ExamBoard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

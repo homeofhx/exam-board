@@ -16,6 +16,7 @@ public final class ExamBoardViewModel: NSObject, ObservableObject, NSSpeechSynth
     @Published var scratchpadFontText = "14"
     @Published var scratchpadFontSize: CGFloat = 14
     @Published var scratchpadText = ""
+    @Published var announcementText = ""
     
     private var currentTimeTimer: Timer?
     private var countdownTimer: Timer?
@@ -280,7 +281,7 @@ struct ContentView: View {
                 resizeHandle(totalWidth: totalWidth)
                 textpadSection.frame(width: rightWidth, height: proxy.size.height)
             }.frame(width: proxy.size.width, height: proxy.size.height)
-        }.frame(minWidth: 800, minHeight: 500)
+        }.frame(minWidth: 800, minHeight: 600)
     }
     
     private func clampedLeftWidth(_ width: CGFloat, totalWidth: CGFloat) -> CGFloat {
@@ -315,8 +316,8 @@ struct ContentView: View {
     // MARK: Timer area
     
     private var timerSection: some View {
-        VStack(spacing: 75) {
-            VStack(spacing: 10) {
+        VStack(spacing: 50) {
+            VStack(spacing: 5) {
                 Text("Time Remaining").font(.headline)
                 
                 Group {
@@ -339,7 +340,15 @@ struct ContentView: View {
                     .minimumScaleFactor(0.8)
                     .lineLimit(1)
             }
-        }.padding(24).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            
+            VStack(spacing: 5) {
+                Text("General Announcements").font(.headline)
+                TextpadTextView(text: $viewModel.announcementText, fontSize: 20)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 150)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.25), lineWidth: 1))
+            }
+        }.frame(maxHeight: .infinity, alignment: .center).padding(.horizontal)
     }
     
     private var editableTimerFields: some View {

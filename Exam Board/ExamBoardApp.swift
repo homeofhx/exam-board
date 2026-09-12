@@ -84,7 +84,7 @@ final class MainWindowController: NSWindowController {
     
     init(rootView: some View) {
         let hostingView = NSHostingView(rootView: rootView)
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 850, height: 600),
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
                               styleMask: [.titled, .closable, .miniaturizable, .resizable],
                               backing: .buffered,
                               defer: false)
