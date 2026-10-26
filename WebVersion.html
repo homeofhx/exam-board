@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <title>Exam Board - Web</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --page: #ffffff;
+            --surface: #ffffff;
+            --field: #ffffff;
+            --text: #171717;
+            --muted: #686868;
+            --subtle: #6f6f6f;
+            --line: #dddddd;
+            --line-strong: #949494;
+            --control: #f1f1f1;
+            --control-hover: #e8e8e8;
+            --control-active: #dddddd;
+            --track: #e7e7e7;
+            --orange: #ff9300;
+            --focus: #985000;
+            --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+                --page: #000000;
+                --surface: #000000;
+                --field: #0c0c0c;
+                --text: #f5f5f5;
+                --muted: #a7a7a7;
+                --subtle: #929292;
+                --line: #292929;
+                --line-strong: #626262;
+                --control: #1b1b1b;
+                --control-hover: #282828;
+                --control-active: #333333;
+                --track: #262626;
+                --focus: #ffad42;
+            }
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-width: 320px;
+            min-height: 100%;
+            margin: 0;
+            background: var(--page);
+        }
+
+        body {
+            min-height: 100dvh;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 14px;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 180ms ease, color 180ms ease;
+        }
+
+        button,
+        input,
+        textarea {
+            font: inherit;
+        }
+
+        button,
+        input,
+        textarea,
+        [role="separator"] {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        [role="separator"]:focus-visible {
+            outline: 3px solid var(--focus);
+            outline-offset: 2px;
+            border-color: var(--focus) !important;
+        }
+
+        .exam-board {
+            width: 100%;
+            height: 100dvh;
+            min-height: min(600px, 100dvh);
+            overflow: hidden;
+            display: block;
+            background: var(--surface);
+            transition: background-color 180ms ease;
+        }
+
+        .workspace {
+            --left-size: 45%;
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .timer-pane {
+            flex: 0 0 clamp(370px, var(--left-size), calc(100% - 381px));
+            min-width: 0;
+            min-height: 0;
+            padding: clamp(28px, 4.5vh, 52px) clamp(24px, 3.4vw, 54px);
+            overflow: auto;
+            background: var(--surface);
+        }
+
+        .timer-content {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: center;
+            gap: clamp(34px, 5.2vh, 58px);
+        }
+
+        .timer-group {
+            width: 100%;
+            text-align: center;
+        }
+
+        .section-title {
+            margin: 0 0 6px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 650;
+            letter-spacing: -0.01em;
+        }
+
+        .timer-readout,
+        .clock-readout {
+            color: var(--text);
+            font-family: var(--mono);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.055em;
+            white-space: nowrap;
+        }
+
+        .timer-readout {
+            margin: 4px 0 11px;
+            font-size: clamp(46px, 5vw, 68px);
+            font-weight: 650;
+            line-height: 1.1;
+        }
+
+        .timer-editor {
+            min-height: 75px;
+            margin: 4px 0 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .timer-editor input {
+            height: 58px;
+            padding: 4px 5px;
+            color: var(--text);
+            background: var(--field);
+            border: 1px solid var(--line-strong);
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: clamp(32px, 3.3vw, 42px);
+            font-weight: 650;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            text-align: center;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        .timer-editor input:first-child {
+            width: 84px;
+        }
+
+        .timer-editor input:not(:first-child) {
+            width: 68px;
+        }
+
+        .timer-editor span {
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: clamp(38px, 4vw, 52px);
+            font-weight: 650;
+            line-height: 1;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 25px;
+            overflow: hidden;
+            background: var(--track);
+            border-radius: 7px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        .progress-fill {
+            width: 100%;
+            height: 100%;
+            background: var(--orange);
+            border-radius: inherit;
+            transition: width 340ms linear;
+        }
+
+        .progress-percent {
+            margin-top: 6px;
+            font-family: var(--mono);
+            font-size: 20px;
+            font-weight: 560;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-readout {
+            margin-top: 3px;
+            font-size: clamp(32px, 3.7vw, 48px);
+            font-weight: 540;
+            line-height: 1.2;
+        }
+
+        .announcement-wrap {
+            min-height: 0;
+        }
+
+        .announcement-editor,
+        .scratchpad {
+            display: block;
+            width: 100%;
+            resize: none;
+            color: var(--text);
+            caret-color: var(--orange);
+            background: var(--field);
+            border: 1px solid var(--line-strong);
+            border-radius: 9px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: border-color 120ms ease, background-color 180ms ease;
+        }
+
+        .announcement-editor::placeholder,
+        .scratchpad::placeholder {
+            color: var(--subtle);
+            opacity: 1;
+        }
+
+        .announcement-editor {
+            height: 150px;
+            padding: 12px 13px;
+            font-size: 20px;
+            line-height: 1.35;
+        }
+
+        .splitter {
+            position: relative;
+            z-index: 2;
+            flex: 0 0 11px;
+            align-self: stretch;
+            background: transparent;
+            border: 0;
+            cursor: col-resize;
+            touch-action: none;
+        }
+
+        .splitter::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 5px;
+            width: 1px;
+            background: var(--line);
+            transition: width 120ms ease, left 120ms ease, background-color 120ms ease;
+        }
+
+        .splitter:hover::before,
+        .splitter:focus-visible::before,
+        .workspace.is-resizing .splitter::before {
+            left: 4px;
+            width: 3px;
+            background: var(--line-strong);
+            border-radius: 3px;
+        }
+
+        .notes-pane {
+            flex: 1 1 auto;
+            min-width: 370px;
+            min-height: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--surface);
+        }
+
+        .toolbar {
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .action-button {
+            min-width: 68px;
+            height: 32px;
+            padding: 0 13px;
+            color: var(--text);
+            background: var(--control);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+            transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease, opacity 120ms ease;
+        }
+
+        .action-button:hover:not(:disabled) {
+            background: var(--control-hover);
+        }
+
+        .action-button:active:not(:disabled) {
+            background: var(--control-active);
+            transform: translateY(1px);
+        }
+
+        .action-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.42;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 22px;
+            margin: 0 1px;
+            background: var(--line);
+        }
+
+        .font-label {
+            margin-left: 1px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 550;
+            white-space: nowrap;
+        }
+
+        .font-input {
+            width: 52px;
+            height: 30px;
+            padding: 3px 6px;
+            color: var(--text);
+            background: var(--field);
+            border: 1px solid var(--line-strong);
+            border-radius: 7px;
+            font-family: var(--mono);
+            text-align: center;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .scratchpad-wrap {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        .scratchpad {
+            height: 100%;
+            min-height: 260px;
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 760px) {
+            .exam-board {
+                height: auto;
+                min-height: 100dvh;
+            }
+
+            .workspace {
+                display: block;
+                overflow: visible;
+            }
+
+            .timer-pane,
+            .notes-pane {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .timer-pane {
+                padding: 42px 24px;
+            }
+
+            .timer-content {
+                gap: 42px;
+            }
+
+            .splitter {
+                display: none;
+            }
+
+            .notes-pane {
+                min-height: 620px;
+                padding: 24px;
+                border-top: 1px solid var(--line);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .timer-pane {
+                padding-inline: 18px;
+            }
+
+            .timer-readout {
+                font-size: clamp(40px, 14vw, 58px);
+            }
+
+            .timer-editor input:first-child {
+                width: 74px;
+            }
+
+            .timer-editor input:not(:first-child) {
+                width: 62px;
+            }
+
+            .notes-pane {
+                padding: 18px;
+            }
+
+            .toolbar {
+                gap: 8px;
+            }
+
+            .toolbar-divider {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="exam-board" aria-label="Exam Board application">
+    <div class="workspace" id="workspace">
+        <section class="timer-pane" aria-label="Timer and announcements">
+            <div class="timer-content">
+                <section class="timer-group" aria-labelledby="timeRemainingHeading">
+                    <h1 class="section-title" id="timeRemainingHeading">Time Remaining</h1>
+
+                    <div class="timer-readout" id="timerReadout" role="timer" aria-live="off"
+                         aria-label="0 hours, 0 minutes, 0 seconds remaining">00:00:00
+                    </div>
+
+                    <div class="timer-editor" id="timerEditor" aria-label="Set exam duration" hidden>
+                        <label class="sr-only" for="hoursInput">Hours</label>
+                        <input id="hoursInput" type="text" value="00" maxlength="4" inputmode="numeric" pattern="[0-9]*"
+                               autocomplete="off" aria-label="Hours">
+                        <span aria-hidden="true">:</span>
+                        <label class="sr-only" for="minutesInput">Minutes</label>
+                        <input id="minutesInput" type="text" value="00" maxlength="2" inputmode="numeric"
+                               pattern="[0-9]*" autocomplete="off" aria-label="Minutes">
+                        <span aria-hidden="true">:</span>
+                        <label class="sr-only" for="secondsInput">Seconds</label>
+                        <input id="secondsInput" type="text" value="00" maxlength="2" inputmode="numeric"
+                               pattern="[0-9]*" autocomplete="off" aria-label="Seconds">
+                    </div>
+
+                    <div class="progress-track" id="progressTrack" role="progressbar" aria-label="Time remaining"
+                         aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-percent" id="progressPercent" aria-hidden="true">100%</div>
+                    <div class="sr-only" id="timerStatus" aria-live="polite">00 hours, 00 minutes, 00 seconds
+                        remaining
+                    </div>
+                </section>
+
+                <section class="timer-group" aria-labelledby="currentTimeHeading">
+                    <h2 class="section-title" id="currentTimeHeading">Current Time</h2>
+                    <time class="clock-readout" id="currentTime" aria-live="off">--:--:-- --</time>
+                </section>
+
+                <section class="timer-group announcement-wrap" aria-labelledby="announcementHeading">
+                    <h2 class="section-title" id="announcementHeading">General Announcements</h2>
+                    <textarea class="announcement-editor" aria-labelledby="announcementHeading"></textarea>
+                </section>
+            </div>
+        </section>
+
+        <div class="splitter" id="splitter" role="separator" aria-label="Resize timer and notes panels"
+             aria-orientation="vertical" aria-valuemin="31" aria-valuemax="69" aria-valuenow="45" tabindex="0"></div>
+
+        <section class="notes-pane" aria-label="Exam notes">
+            <div class="toolbar" aria-label="Timer and text controls">
+                <button class="action-button" id="timerAction" type="button">Set</button>
+                <button class="action-button primary" id="runAction" type="button" data-state="idle">Start</button>
+                <span class="toolbar-divider" aria-hidden="true"></span>
+                <label class="font-label" for="fontInput">Font (pt):</label>
+                <input class="font-input" id="fontInput" type="text" value="14" maxlength="4" inputmode="numeric"
+                       pattern="[0-9]*" autocomplete="off" aria-label="Scratchpad font size in points">
+            </div>
+
+            <div class="scratchpad-wrap">
+                <label class="sr-only" for="scratchpad">Exam notes and corrections</label>
+                <textarea class="scratchpad" id="scratchpad"></textarea>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+    (() => {
+        "use strict";
+
+        const workspace = document.getElementById("workspace");
+        const splitter = document.getElementById("splitter");
+        const timerReadout = document.getElementById("timerReadout");
+        const timerEditor = document.getElementById("timerEditor");
+        const hoursInput = document.getElementById("hoursInput");
+        const minutesInput = document.getElementById("minutesInput");
+        const secondsInput = document.getElementById("secondsInput");
+        const progressTrack = document.getElementById("progressTrack");
+        const progressFill = document.getElementById("progressFill");
+        const progressPercent = document.getElementById("progressPercent");
+        const timerStatus = document.getElementById("timerStatus");
+        const currentTime = document.getElementById("currentTime");
+        const timerAction = document.getElementById("timerAction");
+        const runAction = document.getElementById("runAction");
+        const fontInput = document.getElementById("fontInput");
+        const scratchpad = document.getElementById("scratchpad");
+
+        const state = {
+            configuredSeconds: 0,
+            remainingSeconds: 0,
+            isEditing: false,
+            isRunning: false,
+            deadline: 0,
+            intervalId: null
+        };
+
+        const clockFormatter = new Intl.DateTimeFormat("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+        });
+        const stackedLayout = window.matchMedia("(max-width: 760px)");
+
+        function twoDigits(value) {
+            return String(value).padStart(2, "0");
+        }
+
+        function formatDuration(totalSeconds) {
+            const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+            const hours = Math.floor(safeSeconds / 3600);
+            const minutes = Math.floor((safeSeconds % 3600) / 60);
+            const seconds = safeSeconds % 60;
+            return `${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}`;
+        }
+
+        function durationLabel(totalSeconds) {
+            const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+            const hours = Math.floor(safeSeconds / 3600);
+            const minutes = Math.floor((safeSeconds % 3600) / 60);
+            const seconds = safeSeconds % 60;
+            return `${hours} hours, ${minutes} minutes, ${seconds} seconds remaining`;
+        }
+
+        function percentageRemaining() {
+            if (state.configuredSeconds <= 0) return 100;
+            const value = (state.remainingSeconds / state.configuredSeconds) * 100;
+            return Math.max(0, Math.min(100, Math.round(value)));
+        }
+
+        function updateTimerUI(announce = false) {
+            const percent = percentageRemaining();
+            timerReadout.textContent = formatDuration(state.remainingSeconds);
+            timerReadout.setAttribute("aria-label", durationLabel(state.remainingSeconds));
+            progressFill.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            progressTrack.setAttribute("aria-valuenow", String(percent));
+            progressTrack.setAttribute("aria-valuetext", `${percent}% of the exam time remaining`);
+
+            timerEditor.hidden = !state.isEditing;
+            timerReadout.hidden = state.isEditing;
+            timerAction.textContent = state.isRunning ? "Reset" : state.isEditing ? "Apply" : "Set";
+
+            const isFinished = state.configuredSeconds > 0 && state.remainingSeconds === 0;
+            runAction.textContent = isFinished ? "OK" : state.isRunning ? "Pause" : state.remainingSeconds < state.configuredSeconds ? "Resume" : "Start";
+            runAction.disabled = state.isEditing;
+            runAction.dataset.state = state.isRunning ? "running" : "idle";
+
+            if (announce) timerStatus.textContent = durationLabel(state.remainingSeconds);
+        }
+
+        function stopTicker() {
+            if (state.intervalId !== null) {
+                window.clearInterval(state.intervalId);
+                state.intervalId = null;
+            }
+        }
+
+        function finishTimer() {
+            stopTicker();
+            state.isRunning = false;
+            state.remainingSeconds = 0;
+            updateTimerUI(true);
+        }
+
+        function tick() {
+            if (!state.isRunning) return;
+            const nextValue = Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
+            if (nextValue !== state.remainingSeconds) {
+                state.remainingSeconds = nextValue;
+                updateTimerUI(nextValue === 0 || nextValue % 60 === 0);
+            }
+            if (nextValue === 0) finishTimer();
+        }
+
+        function startTimer() {
+            if (state.remainingSeconds <= 0) return;
+            state.isEditing = false;
+            state.isRunning = true;
+            state.deadline = Date.now() + state.remainingSeconds * 1000;
+            stopTicker();
+            state.intervalId = window.setInterval(tick, 200);
+            updateTimerUI(true);
+        }
+
+        function pauseTimer() {
+            tick();
+            stopTicker();
+            state.isRunning = false;
+            updateTimerUI(true);
+        }
+
+        function resetTimer() {
+            stopTicker();
+            state.isRunning = false;
+            state.isEditing = false;
+            state.remainingSeconds = state.configuredSeconds;
+            updateTimerUI(true);
+        }
+
+        function beginEditing() {
+            state.isEditing = true;
+            hoursInput.value = twoDigits(Math.floor(state.configuredSeconds / 3600));
+            minutesInput.value = twoDigits(Math.floor((state.configuredSeconds % 3600) / 60));
+            secondsInput.value = twoDigits(state.configuredSeconds % 60);
+            updateTimerUI();
+            window.requestAnimationFrame(() => {
+                hoursInput.focus();
+                hoursInput.select();
+            });
+        }
+
+        function numericValue(input) {
+            const parsed = Number.parseInt(input.value, 10);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function applyDuration() {
+            const hours = Math.max(0, numericValue(hoursInput));
+            const minutes = Math.max(0, Math.min(59, numericValue(minutesInput)));
+            const seconds = Math.max(0, Math.min(59, numericValue(secondsInput)));
+            state.configuredSeconds = hours * 3600 + minutes * 60 + seconds;
+            state.remainingSeconds = state.configuredSeconds;
+            state.isEditing = false;
+            hoursInput.value = twoDigits(hours);
+            minutesInput.value = twoDigits(minutes);
+            secondsInput.value = twoDigits(seconds);
+            updateTimerUI(true);
+        }
+
+        timerAction.addEventListener("click", () => {
+            if (state.isRunning) resetTimer();
+            else if (state.isEditing) applyDuration();
+            else beginEditing();
+        });
+
+        runAction.addEventListener("click", () => {
+            const isFinished = state.configuredSeconds > 0 && state.remainingSeconds === 0;
+            if (isFinished) {
+                state.remainingSeconds = state.configuredSeconds;
+                updateTimerUI(true);
+            } else if (state.isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        });
+
+        [hoursInput, minutesInput, secondsInput, fontInput].forEach((input) => {
+            input.addEventListener("input", () => {
+                input.value = input.value.replace(/\D/g, "").slice(0, Number(input.maxLength));
+            });
+        });
+
+        [hoursInput, minutesInput, secondsInput].forEach((input) => {
+            input.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    applyDuration();
+                }
+            });
+        });
+
+        function applyScratchpadFont() {
+            const parsed = Number.parseInt(fontInput.value.trim(), 10);
+            const fontSize = Math.max(1, Number.isFinite(parsed) ? parsed : 14);
+            fontInput.value = String(fontSize);
+            scratchpad.style.fontSize = `${fontSize}px`;
+        }
+
+        fontInput.addEventListener("change", applyScratchpadFont);
+        fontInput.addEventListener("blur", applyScratchpadFont);
+        fontInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                applyScratchpadFont();
+                scratchpad.focus();
+            }
+        });
+
+        function updateClock() {
+            currentTime.textContent = clockFormatter.format(new Date());
+        }
+
+        function splitMetrics() {
+            const bounds = workspace.getBoundingClientRect();
+            const splitterWidth = splitter.getBoundingClientRect().width;
+            const availableWidth = Math.max(0, bounds.width - splitterWidth);
+            const paneMinimum = Math.min(370, availableWidth / 2);
+            const minLeft = paneMinimum;
+            const minRight = paneMinimum;
+            const maxLeft = Math.max(minLeft, bounds.width - minRight - splitterWidth);
+            return {bounds, minLeft, maxLeft};
+        }
+
+        function setSplitWidth(requestedWidth) {
+            const {bounds, minLeft, maxLeft} = splitMetrics();
+            if (bounds.width <= 0) return;
+            const leftWidth = Math.max(minLeft, Math.min(maxLeft, requestedWidth));
+            const percent = (leftWidth / bounds.width) * 100;
+            const minPercent = (minLeft / bounds.width) * 100;
+            const maxPercent = (maxLeft / bounds.width) * 100;
+            workspace.style.setProperty("--left-size", `${percent}%`);
+            splitter.setAttribute("aria-valuemin", String(Math.round(minPercent)));
+            splitter.setAttribute("aria-valuemax", String(Math.round(maxPercent)));
+            splitter.setAttribute("aria-valuenow", String(Math.round(percent)));
+        }
+
+        function syncSplitter() {
+            if (stackedLayout.matches) {
+                splitter.tabIndex = -1;
+                splitter.setAttribute("aria-hidden", "true");
+                return;
+            }
+
+            splitter.tabIndex = 0;
+            splitter.removeAttribute("aria-hidden");
+            const {bounds} = splitMetrics();
+            const currentPercent = Number.parseFloat(getComputedStyle(workspace).getPropertyValue("--left-size")) || 45;
+            setSplitWidth(bounds.width * currentPercent / 100);
+        }
+
+        splitter.addEventListener("pointerdown", (event) => {
+            if (stackedLayout.matches) return;
+            splitter.setPointerCapture(event.pointerId);
+            workspace.classList.add("is-resizing");
+            const {bounds} = splitMetrics();
+            setSplitWidth(event.clientX - bounds.left);
+        });
+
+        splitter.addEventListener("pointermove", (event) => {
+            if (splitter.hasPointerCapture(event.pointerId)) {
+                const {bounds} = splitMetrics();
+                setSplitWidth(event.clientX - bounds.left);
+            }
+        });
+
+        function endResize(event) {
+            if (splitter.hasPointerCapture(event.pointerId)) splitter.releasePointerCapture(event.pointerId);
+            workspace.classList.remove("is-resizing");
+        }
+
+        splitter.addEventListener("pointerup", endResize);
+        splitter.addEventListener("pointercancel", endResize);
+        splitter.addEventListener("keydown", (event) => {
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+            event.preventDefault();
+            const {bounds} = splitMetrics();
+            const currentPercent = Number.parseFloat(getComputedStyle(workspace).getPropertyValue("--left-size")) || 45;
+            const currentWidth = bounds.width * currentPercent / 100;
+            const direction = event.key === "ArrowLeft" ? -1 : 1;
+            const step = bounds.width * (event.shiftKey ? 0.05 : 0.01);
+            setSplitWidth(currentWidth + direction * step);
+        });
+
+        updateClock();
+        window.setInterval(updateClock, 1000);
+        window.addEventListener("resize", syncSplitter);
+        syncSplitter();
+        updateTimerUI();
+    })();
+</script>
+</body>
+</html>
